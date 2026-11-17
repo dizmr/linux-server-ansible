@@ -1,0 +1,29 @@
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - htop
+      - vim
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - restic
+      - sqlite3
+      - python3-venv
+      - nginx
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Enable automatic security updates
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    owner: root
+    mode: "0644"
