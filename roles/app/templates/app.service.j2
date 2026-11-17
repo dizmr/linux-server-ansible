@@ -1,0 +1,18 @@
+[Unit]
+Description=Lab FastAPI application
+After=network.target
+
+[Service]
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory=/opt/{{ app_name }}
+ExecStart=/opt/{{ app_name }}/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+StateDirectory={{ app_name }}
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
