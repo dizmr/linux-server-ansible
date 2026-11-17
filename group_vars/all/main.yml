@@ -1,0 +1,4 @@
+server_name: web1.lab
+timezone: Europe/Kyiv
+app_name: lab-app
+app_user: lab-app
