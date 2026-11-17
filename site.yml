@@ -1,3 +1,4 @@
+---
 - name: Configure web server
   hosts: web
   become: true
@@ -7,3 +8,4 @@
     - firewall
     - app
     - nginx
+    - backup

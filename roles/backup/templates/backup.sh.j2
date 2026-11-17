@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+export RESTIC_PASSWORD="{{ vault_restic_password }}"
+REPO="/opt/backup-repo"
+
+restic backup \
+  --repo "$REPO" \
+  --tag automated \
+  /etc/nginx \
+  /etc/systemd/system \
+  /opt/{{ app_name }} \
+  /var/log/nginx
+
+restic forget \
+  --repo "$REPO" \
+  --keep-daily 7 \
+  --keep-weekly 4 \
+  --keep-monthly 6 \
+  --prune

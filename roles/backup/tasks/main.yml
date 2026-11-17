@@ -1,0 +1,53 @@
+---
+- name: Ensure backup directory exists
+  ansible.builtin.file:
+    path: /opt/backup-repo
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Check if restic repository is initialized
+  ansible.builtin.command: restic snapshots --repo /opt/backup-repo
+  register: restic_check
+  changed_when: false
+  failed_when: false
+  environment:
+    RESTIC_PASSWORD: "{{ vault_restic_password }}"
+
+- name: Initialize restic repository
+  ansible.builtin.command: restic init --repo /opt/backup-repo
+  when: restic_check.rc != 0
+  environment:
+    RESTIC_PASSWORD: "{{ vault_restic_password }}"
+
+- name: Deploy backup script
+  ansible.builtin.template:
+    src: backup.sh.j2
+    dest: /usr/local/bin/restic-backup.sh
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy systemd service
+  ansible.builtin.template:
+    src: restic-backup.service.j2
+    dest: /etc/systemd/system/restic-backup.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy systemd timer
+  ansible.builtin.template:
+    src: restic-backup.timer.j2
+    dest: /etc/systemd/system/restic-backup.timer
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start backup timer
+  ansible.builtin.systemd_service:
+    name: restic-backup.timer
+    enabled: true
+    state: started
+    daemon_reload: true
